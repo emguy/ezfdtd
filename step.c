@@ -293,17 +293,17 @@ void d2e()
                         if (ex)
                         {
                             dx[x][y][z] = dx[x][y][z] - d_t * dipole_ex[x_main][y_main][z_main];
-                            ex[x][y][z] = dx[x][y][z]  / epsilon[x_main][y_main][z_main];
+                            ex[x][y][z] = dx[x][y][z]  / epsilon[x][y][z];
                         }
                         if (ey)
                         {
                             dy[x][y][z] = dy[x][y][z] - d_t * dipole_ey[x_main][y_main][z_main];
-                            ey[x][y][z] = dy[x][y][z]  / epsilon[x_main][y_main][z_main];
+                            ey[x][y][z] = dy[x][y][z]  / epsilon[x][y][z];
                         }
                         if (ez)
                         {
                             dz[x][y][z] = dz[x][y][z] - d_t * dipole_ez[x_main][y_main][z_main];
-                            ez[x][y][z] = dz[x][y][z]  / epsilon[x_main][y_main][z_main];
+                            ez[x][y][z] = dz[x][y][z]  / epsilon[x][y][z];
                         }
                     }
                     else

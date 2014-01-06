@@ -149,6 +149,7 @@ int setup_domain (char *file_name)
 int setup_fields (char* file_name) 
 {
     int x_main, y_main, z_main;
+    int x, y, z;
     int status;
 
     status = h5_get_attr(file_name, "settings", "mode", &mode);
@@ -174,7 +175,7 @@ int setup_fields (char* file_name)
 
     switch (mode)
     {
-        case (0):
+        case (mode_full):
             ex = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
             inspect(ex, "fail to allocate memory for field ex");
             ey = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
@@ -212,7 +213,7 @@ int setup_fields (char* file_name)
             dipole_hz = (double ***)mem3(type_double, main_length_x, main_length_y, main_length_z);
             inspect(dipole_hz, "fail to allocate memory for field dipole_hz");
             break;
-        case (1):
+        case (mode_tmx):
             ex = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
             inspect(ex, "fail to allocate memory for field ex");
             hy = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
@@ -232,7 +233,7 @@ int setup_fields (char* file_name)
             dipole_hz = (double ***)mem3(type_double, main_length_x, main_length_y, main_length_z);
             inspect(dipole_hz, "fail to allocate memory for field dipole_hz");
             break;
-        case (2):
+        case (mode_tmy):
             ey = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
             inspect(ey, "fail to allocate memory for field ey");
             hx = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
@@ -252,7 +253,7 @@ int setup_fields (char* file_name)
             dipole_hz = (double ***)mem3(type_double, main_length_x, main_length_y, main_length_z);
             inspect(dipole_hz, "fail to allocate memory for field dipole_hz");
             break;
-        case (3):
+        case (mode_tmz):
             ez = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
             inspect(ez, "fail to allocate memory for field ez");
             hx = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
@@ -272,7 +273,7 @@ int setup_fields (char* file_name)
             dipole_hy = (double ***)mem3(type_double, main_length_x, main_length_y, main_length_z);
             inspect(dipole_hy, "fail to allocate memory for field dipole_hy");
             break;
-        case (4):
+        case (mode_tex):
             hx = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
             inspect(hx, "fail to allocate memory for field hx");
             ey = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
@@ -292,7 +293,7 @@ int setup_fields (char* file_name)
             dipole_ez = (double ***)mem3(type_double, main_length_x, main_length_y, main_length_z);
             inspect(dipole_ez, "fail to allocate memory for field dipole_ez");
             break;
-        case (5):
+        case (mode_tey):
             hy = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
             inspect(hy, "fail to allocate memory for field hy");
             ex = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
@@ -312,7 +313,7 @@ int setup_fields (char* file_name)
             dipole_ez = (double ***)mem3(type_double, main_length_x, main_length_y, main_length_z);
             inspect(dipole_ez, "fail to allocate memory for field dipole_ez");
             break;
-        case (6):
+        case (mode_tez):
             hz = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
             inspect(hz, "fail to allocate memory for field hz");
             ex = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
@@ -334,12 +335,21 @@ int setup_fields (char* file_name)
             break;
     }
 
-    epsilon = (double ***)h5_load3(file_name, "/materials/epsilon",  main_length_x, main_length_y, main_length_z);
+    epsilon = (double ***)h5_load3(file_name, "/materials/epsilon",  total_length_x, total_length_y, total_length_z);
     inspect(epsilon, "fail to load hdf5 dataset");
-    for (x_main = 0; x_main < main_length_x; x_main++)
-        for (y_main = 0; y_main < main_length_y; y_main++)
-            for (z_main = 0; z_main < main_length_z; z_main++)
-                epsilon[x_main][y_main][z_main] = EPSILON0 * epsilon[x_main][y_main][z_main];
+    for (x = 0; x < total_length_x; x++)
+        for (y = 0; y < total_length_y; y++)
+            for (z = 0; z < total_length_z; z++)
+            {
+                if (in_partition_main(x, y, z))
+                {
+                    x_main = x - partition_data[partition_main].x_start;
+                    y_main = y - partition_data[partition_main].y_start;
+                    z_main = z - partition_data[partition_main].z_start;
+                    epsilon[x][y][z] = EPSILON0 * epsilon[x_main][y_main][z_main];
+                }
+                else epsilon[x][y][z] = EPSILON0;
+            }
 
     return 1;
 }

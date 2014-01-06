@@ -21,6 +21,7 @@
 #include "excitation.h"
 #include "probes.h"
 #include "step.h"
+#include "mur.h"
 #include "pml.h"
 #include "cpml.h"
 #include "dft.h"
@@ -123,6 +124,7 @@ int main (int argc, char** argv)
         status = setup_ade(input_file_name);
         check(status, "fail to setup ade");
     }
+
 
     if (pml_type != 0) 
     {

@@ -1,5 +1,5 @@
 EXECUTABLE=ezfdtd
-SRC = ezfdtd.c domain.c ade.c step.c excitation.c probes.c dft.c pml.c cpml.c classical.c tools.c mem.c h5io.c
+SRC = ezfdtd.c domain.c ade.c step.c excitation.c probes.c dft.c pml.c cpml.c classical.c tools.c mem.c h5io.c mur.c
 HEADERS = $(SRC:.c=.h)
 OBJECTS = $(SRC:.c=.o)
 OBJECTS_EXE = $(SRC:.c=.wo)
