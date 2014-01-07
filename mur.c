@@ -318,7 +318,7 @@ int setup_mur (char* file_name)
     return 1;
 }
     
-int update_mur ()
+void update_mur ()
 {
     if (partition_data[partition_x0].boundary_type == boundary_mur)
     {
@@ -350,7 +350,6 @@ int update_mur ()
         if (mode == mode_full && mode == mode_tmx && mode == mode_tey) update_ex_z1();
         if (mode == mode_full && mode == mode_tmy && mode == mode_tex) update_ey_z1();
     }
-    return 1;
 }
 
 static void update_ey_x0 ()
