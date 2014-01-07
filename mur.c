@@ -20,6 +20,21 @@
 #include "h5io.h"
 #include "pml.h"
 
+static void update_ey_x0 ();
+static void update_ez_x0 ();
+static void update_ey_x1 ();
+static void update_ez_x1 ();
+
+static void update_ex_y0 ();
+static void update_ez_y0 ();
+static void update_ex_y1 ();
+static void update_ez_y1 ();
+
+static void update_ex_z0 ();
+static void update_ey_z0 ();
+static void update_ex_z1 ();
+static void update_ey_z1 ();
+
 double **ey_x0;
 double **ez_x0;
 double **ey_x1;
@@ -303,7 +318,493 @@ int setup_mur (char* file_name)
     return 1;
 }
     
+int update_mur ()
+{
+    if (partition_data[partition_x0].boundary_type == boundary_mur)
+    {
+        if (mode == mode_full && mode == mode_tmy && mode == mode_tez) update_ey_x0();
+        if (mode == mode_full && mode == mode_tmz && mode == mode_tey) update_ez_x0();
+    }
+    if (partition_data[partition_x1].boundary_type == boundary_mur)
+    {
+        if (mode == mode_full && mode == mode_tmy && mode == mode_tez) update_ey_x1();
+        if (mode == mode_full && mode == mode_tmz && mode == mode_tey) update_ez_x1();
+    }
+    if (partition_data[partition_y0].boundary_type == boundary_mur)
+    {
+        if (mode == mode_full && mode == mode_tmx && mode == mode_tez) update_ex_y0();
+        if (mode == mode_full && mode == mode_tmz && mode == mode_tex) update_ez_y0();
+    }
+    if (partition_data[partition_y1].boundary_type == boundary_mur)
+    {
+        if (mode == mode_full && mode == mode_tmx && mode == mode_tez) update_ex_y1();
+        if (mode == mode_full && mode == mode_tmz && mode == mode_tex) update_ez_y1();
+    }
+    if (partition_data[partition_z0].boundary_type == boundary_mur)
+    {
+        if (mode == mode_full && mode == mode_tmx && mode == mode_tey) update_ex_z0();
+        if (mode == mode_full && mode == mode_tmy && mode == mode_tex) update_ey_z0();
+    }
+    if (partition_data[partition_z1].boundary_type == boundary_mur)
+    {
+        if (mode == mode_full && mode == mode_tmx && mode == mode_tey) update_ex_z1();
+        if (mode == mode_full && mode == mode_tmy && mode == mode_tex) update_ey_z1();
+    }
+    return 1;
+}
 
+static void update_ey_x0 ()
+{
+    double temp;
+    int y, z;
 
+    for (y = 0; y < total_length_y; y++)
+        for (z = 0; z < total_length_z; z++)
+        {
+            temp = ey[0][y][z];
 
+            ey[0][y][z] = ey_x0[y][z] - ey_x0_d[y][z] + k1_x0[y][z] * (ey[1][y][z] + ey_x0_d[y][z]);
 
+            ey_x0_d[y][z] = temp;
+
+            ey_x0[y][z] = k2_x0[y][z] * (ey[0][y][z] + ey[1][y][z]);
+            if (y > 0)
+            {
+                ey_x0[y][z] += ky_x0[y][z] * (ey[0][y-1][z] - ey[0][y][z]);
+                ey_x0[y][z] += ky_x0[y][z] * (ey[1][y-1][z] - ey[1][y][z]);
+            }
+            if (y < total_length_y)
+            {
+                ey_x0[y][z] += ky_x0[y][z] * (ey[0][y+1][z] - ey[0][y][z]);
+                ey_x0[y][z] += ky_x0[y][z] * (ey[1][y+1][z] - ey[1][y][z]);
+            }
+            if (z > 0)
+            {
+                ey_x0[y][z] += kz_x0[y][z] * (ey[0][y][z-1] - ey[0][y][z]);
+                ey_x0[y][z] += kz_x0[y][z] * (ey[1][y][z-1] - ey[1][y][z]);
+            }
+            if (z < total_length_z)
+            {
+                ey_x0[y][z] += kz_x0[y][z] * (ey[0][y][z+1] - ey[0][y][z]);
+                ey_x0[y][z] += kz_x0[y][z] * (ey[1][y][z+1] - ey[1][y][z]);
+            }
+        }
+}
+
+static void update_ez_x0 ()
+{
+    double temp;
+    int y, z;
+
+    for (y = 0; y < total_length_y; y++)
+        for (z = 0; z < total_length_z; z++)
+        {
+            temp = ez[0][y][z];
+
+            ez[0][y][z] = ez_x0[y][z] - ez_x0_d[y][z] + k1_x0[y][z] * (ez[1][y][z] + ez_x0_d[y][z]);
+
+            ez_x0_d[y][z] = temp;
+
+            ez_x0[y][z] = k2_x0[y][z] * (ez[0][y][z] + ez[1][y][z]);
+            if (y > 0)
+            {
+                ez_x0[y][z] += ky_x0[y][z] * (ez[0][y-1][z] - ez[0][y][z]);
+                ez_x0[y][z] += ky_x0[y][z] * (ez[1][y-1][z] - ez[1][y][z]);
+            }
+            if (y < total_length_y)
+            {
+                ez_x0[y][z] += ky_x0[y][z] * (ez[0][y+1][z] - ez[0][y][z]);
+                ez_x0[y][z] += ky_x0[y][z] * (ez[1][y+1][z] - ez[1][y][z]);
+            }
+            if (z > 0)
+            {
+                ez_x0[y][z] += kz_x0[y][z] * (ez[0][y][z-1] - ez[0][y][z]);
+                ez_x0[y][z] += kz_x0[y][z] * (ez[1][y][z-1] - ez[1][y][z]);
+            }
+            if (z < total_length_z)
+            {
+                ez_x0[y][z] += kz_x0[y][z] * (ez[0][y][z+1] - ez[0][y][z]);
+                ez_x0[y][z] += kz_x0[y][z] * (ez[1][y][z+1] - ez[1][y][z]);
+            }
+        }
+}
+
+static void update_ey_x1 ()
+{
+    double temp;
+    int y, z;
+
+    for (y = 0; y < total_length_y; y++)
+        for (z = 0; z < total_length_z; z++)
+        {
+            temp = ey[total_length_x][y][z];
+
+            ey[total_length_x][y][z] = ey_x1[y][z] - ey_x1_d[y][z] + k1_x1[y][z] * (ey[total_length_x - 1][y][z] + ey_x1_d[y][z]);
+
+            ey_x1_d[y][z] = temp;
+
+            ey_x1[y][z] = k2_x1[y][z] * (ey[total_length_x][y][z] + ey[total_length_x - 1][y][z]);
+            if (y > 0)
+            {
+                ey_x1[y][z] += ky_x1[y][z] * (ey[total_length_x][y-1][z] - ey[total_length_x][y][z]);
+                ey_x1[y][z] += ky_x1[y][z] * (ey[total_length_x - 1][y-1][z] - ey[total_length_x - 1][y][z]);
+            }
+            if (y < total_length_y)
+            {
+                ey_x1[y][z] += ky_x1[y][z] * (ey[total_length_x][y+1][z] - ey[total_length_x][y][z]);
+                ey_x1[y][z] += ky_x1[y][z] * (ey[total_length_x - 1][y+1][z] - ey[total_length_x - 1][y][z]);
+            }
+            if (z > 0)
+            {
+                ey_x1[y][z] += kz_x1[y][z] * (ey[total_length_x][y][z-1] - ey[total_length_x][y][z]);
+                ey_x1[y][z] += kz_x1[y][z] * (ey[total_length_x - 1][y][z-1] - ey[total_length_x - 1][y][z]);
+            }
+            if (z < total_length_z)
+            {
+                ey_x1[y][z] += kz_x1[y][z] * (ey[total_length_x][y][z+1] - ey[total_length_x][y][z]);
+                ey_x1[y][z] += kz_x1[y][z] * (ey[total_length_x - 1][y][z+1] - ey[total_length_x - 1][y][z]);
+            }
+        }
+}
+
+static void update_ez_x1 ()
+{
+    double temp;
+    int y, z;
+
+    for (y = 0; y < total_length_y; y++)
+        for (z = 0; z < total_length_z; z++)
+        {
+            temp = ey[total_length_x][y][z];
+
+            ez[total_length_x][y][z] = ez_x1[y][z] - ez_x1_d[y][z] + k1_x1[y][z] * (ez[total_length_x - 1][y][z] + ez_x1_d[y][z]);
+
+            ez_x1_d[y][z] = temp;
+
+            ez_x1[y][z] = k2_x1[y][z] * (ez[total_length_x][y][z] + ez[total_length_x - 1][y][z]);
+            if (y > 0)
+            {
+                ez_x1[y][z] += ky_x1[y][z] * (ez[total_length_x][y-1][z] - ez[total_length_x][y][z]);
+                ez_x1[y][z] += ky_x1[y][z] * (ez[total_length_x - 1][y-1][z] - ez[total_length_x - 1][y][z]);
+            }
+            if (y < total_length_y)
+            {
+                ez_x1[y][z] += ky_x1[y][z] * (ez[total_length_x][y+1][z] - ez[total_length_x][y][z]);
+                ez_x1[y][z] += ky_x1[y][z] * (ez[total_length_x - 1][y+1][z] - ez[total_length_x - 1][y][z]);
+            }
+            if (z > 0)
+            {
+                ez_x1[y][z] += kz_x1[y][z] * (ez[total_length_x][y][z-1] - ez[total_length_x][y][z]);
+                ez_x1[y][z] += kz_x1[y][z] * (ez[total_length_x - 1][y][z-1] - ez[total_length_x - 1][y][z]);
+            }
+            if (z < total_length_z)
+            {
+                ez_x1[y][z] += kz_x1[y][z] * (ez[total_length_x][y][z+1] - ez[total_length_x][y][z]);
+                ez_x1[y][z] += kz_x1[y][z] * (ez[total_length_x - 1][y][z+1] - ez[total_length_x - 1][y][z]);
+            }
+        }
+}
+
+static void update_ex_y0 ()
+{
+    double temp;
+    int x, z;
+
+    for (x = 0; x < total_length_x; x++)
+        for (z = 0; z < total_length_z; z++)
+        {
+            temp = ex[x][0][z];
+
+            ex[x][0][z] = ex_y0[x][z] - ex_y0_d[x][z] + k1_y0[x][z] * (ex[x][1][z] + ex_y0_d[x][z]);
+
+            ex_y0_d[x][z] = temp;
+
+            ex_y0[x][z] = k2_y0[x][z] * (ex[x][0][z] + ex[x][1][z]);
+            if (x > 0)
+            {
+                ex_y0[x][z] += kx_y0[x][z] * (ex[x-1][0][z] - ex[x][0][z]);
+                ex_y0[x][z] += kx_y0[x][z] * (ex[x-1][1][z] - ex[x][1][z]);
+            }
+            if (x < total_length_x)
+            {
+                ex_y0[x][z] += kx_y0[x][z] * (ex[x+1][0][z] - ex[x][0][z]);
+                ex_y0[x][z] += kx_y0[x][z] * (ex[x+1][1][z] - ex[x][1][z]);
+            }
+            if (z > 0)
+            {
+                ex_y0[x][z] += kz_y0[x][z] * (ex[x][0][z-1] - ex[x][0][z]);
+                ex_y0[x][z] += kz_y0[x][z] * (ex[x][1][z-1] - ex[x][1][z]);
+            }
+            if (z < total_length_z)
+            {
+                ex_y0[x][z] += kz_y0[x][z] * (ex[x][0][z+1] - ex[x][0][z]);
+                ex_y0[x][z] += kz_y0[x][z] * (ex[x][1][z+1] - ex[x][1][z]);
+            }
+        }
+}
+
+static void update_ez_y0 ()
+{
+    double temp;
+    int x, z;
+
+    for (x = 0; x < total_length_x; x++)
+        for (z = 0; z < total_length_z; z++)
+        {
+            temp = ez[x][0][z];
+
+            ez[x][0][z] = ez_y0[x][z] - ez_y0_d[x][z] + k1_y0[x][z] * (ez[x][1][z] + ez_y0_d[x][z]);
+
+            ez_y0_d[x][z] = temp;
+
+            ez_y0[x][z] = k2_y0[x][z] * (ez[x][0][z] + ez[x][1][z]);
+            if (x > 0)
+            {
+                ez_y0[x][z] += kx_y0[x][z] * (ez[x-1][0][z] - ez[x][0][z]);
+                ez_y0[x][z] += kx_y0[x][z] * (ez[x-1][1][z] - ez[x][1][z]);
+            }
+            if (x < total_length_x)
+            {
+                ez_y0[x][z] += kx_y0[x][z] * (ez[x+1][0][z] - ez[x][0][z]);
+                ez_y0[x][z] += kx_y0[x][z] * (ez[x+1][1][z] - ez[x][1][z]);
+            }
+            if (z > 0)
+            {
+                ez_y0[x][z] += kz_y0[x][z] * (ez[x][0][z-1] - ez[x][0][z]);
+                ez_y0[x][z] += kz_y0[x][z] * (ez[x][1][z-1] - ez[x][1][z]);
+            }
+            if (z < total_length_z)
+            {
+                ez_y0[x][z] += kz_y0[x][z] * (ez[x][0][z+1] - ez[x][0][z]);
+                ez_y0[x][z] += kz_y0[x][z] * (ez[x][1][z+1] - ez[x][1][z]);
+            }
+        }
+}
+
+static void update_ex_y1 ()
+{
+    double temp;
+    int x, z;
+
+    for (x = 0; x < total_length_x; x++)
+        for (z = 0; z < total_length_z; z++)
+        {
+            temp = ex[x][total_length_y][z];
+
+            ex[x][total_length_y][z] = ex_y1[x][z] - ex_y1_d[x][z] + k1_y1[x][z] * (ex[x][total_length_y - 1][z] + ex_y1_d[x][z]);
+
+            ex_y1_d[x][z] = temp;
+
+            ex_y1[x][z] = k2_y1[x][z] * (ex[x][total_length_y][z] + ex[x][total_length_y - 1][z]);
+            if (x > 0)
+            {
+                ex_y1[x][z] += kx_y1[x][z] * (ex[x-1][total_length_y][z] - ex[x][total_length_y][z]);
+                ex_y1[x][z] += kx_y1[x][z] * (ex[x-1][total_length_y - 1][z] - ex[x][total_length_y - 1][z]);
+            }
+            if (x < total_length_x)
+            {
+                ex_y1[x][z] += kx_y1[x][z] * (ex[x+1][total_length_y][z] - ex[x][total_length_y][z]);
+                ex_y1[x][z] += kx_y1[x][z] * (ex[x+1][total_length_y - 1][z] - ex[x][total_length_y - 1][z]);
+            }
+            if (z > 0)
+            {
+                ex_y1[x][z] += kz_y1[x][z] * (ex[x][total_length_y][z-1] - ex[x][total_length_y][z]);
+                ex_y1[x][z] += kz_y1[x][z] * (ex[x][total_length_y - 1][z-1] - ex[x][total_length_y - 1][z]);
+            }
+            if (z < total_length_z)
+            {
+                ex_y1[x][z] += kz_y1[x][z] * (ex[x][total_length_y][z+1] - ex[x][total_length_y][z]);
+                ex_y1[x][z] += kz_y1[x][z] * (ex[x][total_length_y - 1][z+1] - ex[x][total_length_y - 1][z]);
+            }
+        }
+}
+
+static void update_ez_y1 ()
+{
+    double temp;
+    int x, z;
+
+    for (x = 0; x < total_length_x; x++)
+        for (z = 0; z < total_length_z; z++)
+        {
+            temp = ez[x][total_length_y][z];
+
+            ez[x][total_length_y][z] = ez_y1[x][z] - ez_y1_d[x][z] + k1_y1[x][z] * (ez[x][total_length_y - 1][z] + ez_y1_d[x][z]);
+
+            ez_y1_d[x][z] = temp;
+
+            ez_y1[x][z] = k2_y1[x][z] * (ez[x][total_length_y][z] + ez[x][total_length_y - 1][z]);
+            if (x > 0)
+            {
+                ez_y1[x][z] += kx_y1[x][z] * (ez[x-1][total_length_y][z] - ez[x][total_length_y][z]);
+                ez_y1[x][z] += kx_y1[x][z] * (ez[x-1][total_length_y - 1][z] - ez[x][total_length_y - 1][z]);
+            }
+            if (x < total_length_x)
+            {
+                ez_y1[x][z] += kx_y1[x][z] * (ez[x+1][total_length_y][z] - ez[x][total_length_y][z]);
+                ez_y1[x][z] += kx_y1[x][z] * (ez[x+1][total_length_y - 1][z] - ez[x][total_length_y - 1][z]);
+            }
+            if (z > 0)
+            {
+                ez_y1[x][z] += kz_y1[x][z] * (ez[x][total_length_y][z-1] - ez[x][total_length_y][z]);
+                ez_y1[x][z] += kz_y1[x][z] * (ez[x][total_length_y - 1][z-1] - ez[x][total_length_y - 1][z]);
+            }
+            if (z < total_length_z)
+            {
+                ez_y1[x][z] += kz_y1[x][z] * (ez[x][total_length_y][z+1] - ez[x][total_length_y][z]);
+                ez_y1[x][z] += kz_y1[x][z] * (ez[x][total_length_y - 1][z+1] - ez[x][total_length_y - 1][z]);
+            }
+        }
+}
+
+static void update_ex_z0 ()
+{
+    double temp;
+    int x, y;
+
+    for (x = 0; x < total_length_x; x++)
+        for (y = 0; y < total_length_y; y++)
+        {
+            temp = ex[x][y][0];
+
+            ex[x][y][0] = ex_z0[x][y] - ex_z0_d[x][y] + k1_z0[x][y] * (ex[x][y][1] + ex_z0_d[x][y]);
+
+            ex_z0_d[x][y] = temp;
+
+            ex_z0[x][y] = k2_z0[x][y] * (ex[x][y][0] + ex[x][y][1]);
+            if (x > 0)
+            {
+                ex_z0[x][y] += kx_z0[x][y] * (ex[x-1][y][0] - ex[x][y][0]);
+                ex_z0[x][y] += kx_z0[x][y] * (ex[x-1][y][1] - ex[x][y][1]);
+            }
+            if (x < total_length_x)
+            {
+                ex_z0[x][y] += kx_z0[x][y] * (ex[x+1][y][0] - ex[x][y][0]);
+                ex_z0[x][y] += kx_z0[x][y] * (ex[x+1][y][1] - ex[x][y][1]);
+            }
+            if (y > 0)
+            {
+                ex_z0[x][y] += ky_z0[x][y] * (ex[x][y-1][0] - ex[x][y][0]);
+                ex_z0[x][y] += ky_z0[x][y] * (ex[x][y-1][1] - ex[x][y][1]);
+            }
+            if (y < total_length_y)
+            {
+                ex_z0[x][y] += ky_z0[x][y] * (ex[x][y+1][0] - ex[x][y][0]);
+                ex_z0[x][y] += ky_z0[x][y] * (ex[x][y+1][1] - ex[x][y][1]);
+            }
+        }
+}
+
+static void update_ey_z0 ()
+{
+    double temp;
+    int x, y;
+
+    for (x = 0; x < total_length_x; x++)
+        for (y = 0; y < total_length_y; y++)
+        {
+            temp = ey[x][y][0];
+
+            ey[x][y][0] = ey_z0[x][y] - ey_z0_d[x][y] + k1_z0[x][y] * (ey[x][y][1] + ey_z0_d[x][y]);
+
+            ey_z0_d[x][y] = temp;
+
+            ey_z0[x][y] = k2_z0[x][y] * (ey[x][y][0] + ey[x][y][1]);
+            if (x > 0)
+            {
+                ey_z0[x][y] += kx_z0[x][y] * (ey[x-1][y][0] - ey[x][y][0]);
+                ey_z0[x][y] += kx_z0[x][y] * (ey[x-1][y][1] - ey[x][y][1]);
+            }
+            if (x < total_length_x)
+            {
+                ey_z0[x][y] += kx_z0[x][y] * (ey[x+1][y][0] - ey[x][y][0]);
+                ey_z0[x][y] += kx_z0[x][y] * (ey[x+1][y][1] - ey[x][y][1]);
+            }
+            if (y > 0)
+            {
+                ey_z0[x][y] += ky_z0[x][y] * (ey[x][y-1][0] - ey[x][y][0]);
+                ey_z0[x][y] += ky_z0[x][y] * (ey[x][y-1][1] - ey[x][y][1]);
+            }
+            if (y < total_length_y)
+            {
+                ey_z0[x][y] += ky_z0[x][y] * (ey[x][y+1][0] - ey[x][y][0]);
+                ey_z0[x][y] += ky_z0[x][y] * (ey[x][y+1][1] - ey[x][y][1]);
+            }
+        }
+}
+
+static void update_ex_z1 ()
+{
+    double temp;
+    int x, y;
+
+    for (x = 0; x < total_length_x; x++)
+        for (y = 0; y < total_length_y; y++)
+        {
+            temp = ex[x][y][total_length_z];
+
+            ex[x][y][total_length_z] = ex_z0[x][y] - ex_z0_d[x][y] + k1_z0[x][y] * (ex[x][y][total_length_z - 1] + ex_z0_d[x][y]);
+
+            ex_z0_d[x][y] = temp;
+
+            ex_z0[x][y] = k2_z0[x][y] * (ex[x][y][total_length_z] + ex[x][y][total_length_z - 1]);
+            if (x > 0)
+            {
+                ex_z0[x][y] += kx_z0[x][y] * (ex[x-1][y][total_length_z] - ex[x][y][total_length_z]);
+                ex_z0[x][y] += kx_z0[x][y] * (ex[x-1][y][total_length_z - 1] - ex[x][y][total_length_z - 1]);
+            }
+            if (x < total_length_x)
+            {
+                ex_z0[x][y] += kx_z0[x][y] * (ex[x+1][y][total_length_z] - ex[x][y][total_length_z]);
+                ex_z0[x][y] += kx_z0[x][y] * (ex[x+1][y][total_length_z - 1] - ex[x][y][total_length_z - 1]);
+            }
+            if (y > 0)
+            {
+                ex_z0[x][y] += ky_z0[x][y] * (ex[x][y-1][total_length_z] - ex[x][y][total_length_z]);
+                ex_z0[x][y] += ky_z0[x][y] * (ex[x][y-1][total_length_z - 1] - ex[x][y][total_length_z - 1]);
+            }
+            if (y < total_length_y)
+            {
+                ex_z0[x][y] += ky_z0[x][y] * (ex[x][y+1][total_length_z] - ex[x][y][total_length_z]);
+                ex_z0[x][y] += ky_z0[x][y] * (ex[x][y+1][total_length_z - 1] - ex[x][y][total_length_z - 1]);
+            }
+        }
+}
+
+static void update_ey_z1 ()
+{
+    double temp;
+    int x, y;
+
+    for (x = 0; x < total_length_x; x++)
+        for (y = 0; y < total_length_y; y++)
+        {
+            temp = ey[x][y][total_length_z];
+
+            ey[x][y][total_length_z] = ey_z0[x][y] - ey_z0_d[x][y] + k1_z0[x][y] * (ey[x][y][total_length_z - 1] + ey_z0_d[x][y]);
+
+            ey_z0_d[x][y] = temp;
+
+            ey_z0[x][y] = k2_z0[x][y] * (ey[x][y][total_length_z] + ey[x][y][total_length_z - 1]);
+            if (x > 0)
+            {
+                ey_z0[x][y] += kx_z0[x][y] * (ey[x-1][y][total_length_z] - ey[x][y][total_length_z]);
+                ey_z0[x][y] += kx_z0[x][y] * (ey[x-1][y][total_length_z - 1] - ey[x][y][total_length_z - 1]);
+            }
+            if (x < total_length_x)
+            {
+                ey_z0[x][y] += kx_z0[x][y] * (ey[x+1][y][total_length_z] - ey[x][y][total_length_z]);
+                ey_z0[x][y] += kx_z0[x][y] * (ey[x+1][y][total_length_z - 1] - ey[x][y][total_length_z - 1]);
+            }
+            if (y > 0)
+            {
+                ey_z0[x][y] += ky_z0[x][y] * (ey[x][y-1][total_length_z] - ey[x][y][total_length_z]);
+                ey_z0[x][y] += ky_z0[x][y] * (ey[x][y-1][total_length_z - 1] - ey[x][y][total_length_z - 1]);
+            }
+            if (y < total_length_y)
+            {
+                ey_z0[x][y] += ky_z0[x][y] * (ey[x][y+1][total_length_z] - ey[x][y][total_length_z]);
+                ey_z0[x][y] += ky_z0[x][y] * (ey[x][y+1][total_length_z - 1] - ey[x][y][total_length_z - 1]);
+            }
+        }
+}

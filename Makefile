@@ -41,6 +41,6 @@ exe: $(OBJECTS_EXE)
 	@$(CC_EXE) -Wall -o $(EXECUTABLE).exe $(OBJECTS_EXE) $(LIBMATH)  -lhdf5  -lz
 
 clean:
-	@rm -f $(OBJECTS) $(OBJECTS_EXE) $(EXECUTABLE) $(EXECUTABLE).exe
+	@rm -f $(OBJECTS) $(OBJECTS_EXE) $(EXECUTABLE) $(EXECUTABLE).exe cscope*
 
 .PHONY: all options clean

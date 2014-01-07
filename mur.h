@@ -18,7 +18,5 @@
 #define MUR_H
 
 int setup_mur (char* file_name);
-void mur_update_h ();
-void mur_update_e ();
 
 #endif
