@@ -83,6 +83,7 @@ static void compute (int time_index)
     get_h();
     apply_hhards(time_index);
     get_e();
+    update_mur();
     apply_ehards(time_index);
     apply_pmc();
 }
@@ -111,9 +112,13 @@ int main (int argc, char** argv)
 
     status = setup_domain(input_file_name);
     check(status, "fail to setup domain");
+
     
     status = setup_fields(input_file_name);
     check(status, "fail to setup fields");
+
+    status = setup_mur();
+    check(status, "fail to setup abc_mur");
 
     status = setup_classical(input_file_name);
     check(status, "fail to setup classical mode");
@@ -124,7 +129,6 @@ int main (int argc, char** argv)
         status = setup_ade(input_file_name);
         check(status, "fail to setup ade");
     }
-
 
     if (pml_type != 0) 
     {

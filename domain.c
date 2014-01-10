@@ -151,6 +151,7 @@ int setup_fields (char* file_name)
     int x_main, y_main, z_main;
     int x, y, z;
     int status;
+    double ***epsilon_main;
 
     status = h5_get_attr(file_name, "settings", "mode", &mode);
     inspect(status, "fail to get h5 attributes");
@@ -335,22 +336,26 @@ int setup_fields (char* file_name)
             break;
     }
 
-    epsilon = (double ***)h5_load3(file_name, "/materials/epsilon",  total_length_x, total_length_y, total_length_z);
-    inspect(epsilon, "fail to load hdf5 dataset");
-    for (x = 0; x < total_length_x; x++)
-        for (y = 0; y < total_length_y; y++)
-            for (z = 0; z < total_length_z; z++)
+    epsilon_main = (double ***)h5_load3(file_name, "/materials/epsilon",  main_length_x, main_length_y, main_length_z);
+    epsilon = (double ***)mem3(type_double, total_length_x + 1, total_length_y + 1, total_length_z + 1);
+    inspect(epsilon_main, "fail to load hdf5 dataset");
+    for (x = 0; x <= total_length_x; x++)
+        for (y = 0; y <= total_length_y; y++)
+            for (z = 0; z <= total_length_z; z++)
             {
                 if (in_partition_main(x, y, z))
                 {
                     x_main = x - partition_data[partition_main].x_start;
                     y_main = y - partition_data[partition_main].y_start;
                     z_main = z - partition_data[partition_main].z_start;
-                    epsilon[x][y][z] = EPSILON0 * epsilon[x_main][y_main][z_main];
+                    epsilon[x][y][z] = EPSILON0 * epsilon_main[x_main][y_main][z_main];
                 }
                 else epsilon[x][y][z] = EPSILON0;
-            }
 
+                if (x == total_length_x) epsilon[x][y][z] = epsilon[x-1][y][z]; 
+                if (y == total_length_y) epsilon[x][y][z] = epsilon[x][y-1][z]; 
+                if (z == total_length_z) epsilon[x][y][z] = epsilon[x][y][z-1]; 
+            }
     return 1;
 }
 

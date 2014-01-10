@@ -17,7 +17,7 @@
 #ifndef MUR_H
 #define MUR_H
 
-int setup_mur (char* file_name);
+int setup_mur ();
 void update_mur();
 
 #endif
