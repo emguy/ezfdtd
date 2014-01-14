@@ -18,3 +18,5 @@ Requirements
 ------
 - hdf5
 - zlib
+- numpy (python requirement)
+- hypy (python requirement)
