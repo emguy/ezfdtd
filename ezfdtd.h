@@ -26,7 +26,7 @@
 #define PI 3.1415926535897932384626434
 
 
-typedef struct
+typedef struct _DomainData
 {
     unsigned int x_start; 
     unsigned int y_start;
