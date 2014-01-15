@@ -21,7 +21,7 @@
 #define DEBUG 1
 #endif
 
-#define POLE_MAX 10
+#define POLE_MAX 99 
 #define TOLERANCE 6.6e-66
 #define PI 3.1415926535897932384626434
 

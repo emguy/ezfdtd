@@ -34,7 +34,7 @@ options:
 $(EXECUTABLE): $(OBJECTS)
 	@echo CC -o $@
 	@$(CC) -Wall -o $@ $(OBJECTS) -lhdf5 -lm
-	@cp -vf ezfdtd ../../working_dir/FDTD_antenna/fdtdio/ezfdtd
+	@cp -vf ezfdtd ../../working_dir/FDTD_test/fdtdio/ezfdtd
 
 exe: $(OBJECTS_EXE)
 	@echo CC_EXE -o $@
