@@ -21,12 +21,12 @@
 #define DEBUG 1
 #endif
 
-#define POLE_MAX 10
+#define POLE_MAX 99 
 #define TOLERANCE 6.6e-66
 #define PI 3.1415926535897932384626434
 
 
-typedef struct
+typedef struct _DomainData
 {
     unsigned int x_start; 
     unsigned int y_start;
@@ -48,7 +48,7 @@ enum{dim_t, dim_x, dim_y, dim_z};
 enum{partition_main, partition_z0, partition_z1, partition_x0, partition_x1, partition_y0, partition_y1};
 
 /* boundary types */
-enum{boundary_air, boundary_pec, boundary_pmc, boundary_pml};
+enum{boundary_air, boundary_pec, boundary_pmc, boundary_pml, boundary_mur};
 
 /* mode */
 extern unsigned int mode;

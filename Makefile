@@ -1,5 +1,5 @@
 EXECUTABLE=ezfdtd
-SRC = ezfdtd.c domain.c ade.c step.c excitation.c probes.c dft.c pml.c cpml.c classical.c tools.c mem.c h5io.c
+SRC = ezfdtd.c domain.c ade.c step.c excitation.c probes.c dft.c pml.c cpml.c classical.c tools.c mem.c h5io.c mur.c
 HEADERS = $(SRC:.c=.h)
 OBJECTS = $(SRC:.c=.o)
 OBJECTS_EXE = $(SRC:.c=.wo)
@@ -34,13 +34,13 @@ options:
 $(EXECUTABLE): $(OBJECTS)
 	@echo CC -o $@
 	@$(CC) -Wall -o $@ $(OBJECTS) -lhdf5 -lm
-	#@cp -vf ezfdtd ../fdtdio
+	@cp -vf ezfdtd ../../working_dir/FDTD_test/fdtdio/ezfdtd
 
 exe: $(OBJECTS_EXE)
 	@echo CC_EXE -o $@
 	@$(CC_EXE) -Wall -o $(EXECUTABLE).exe $(OBJECTS_EXE) $(LIBMATH)  -lhdf5  -lz
 
 clean:
-	@rm -f $(OBJECTS) $(OBJECTS_EXE) $(EXECUTABLE) $(EXECUTABLE).exe
+	@rm -f $(OBJECTS) $(OBJECTS_EXE) $(EXECUTABLE) $(EXECUTABLE).exe cscope*
 
 .PHONY: all options clean
