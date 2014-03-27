@@ -32,15 +32,23 @@ typedef struct
 {
     int dim;
     int slice_index;
+    int length_x;
+    int length_y;
+    int length_z;
+    int x_start;
+    int y_start;
+    int z_start;
+    int x_stop;
+    int y_stop;
+    int z_stop;
     int polarization;
     double **field_buffer;
-    int with_pml;
 } FieldPlane;
 
-extern OutputPort output_ports[100];
+extern OutputPort output_ports[];
 extern int total_output_ports;
 
-int setup_planes(char* file_name, char* output_file_name, int with_pml);
+int setup_planes(char* file_name, char* output_file_name);
 int update_planes (char* file_name, int time_index);
 int setup_output_ports(char* file_name);
 int update_ports(int time_index);

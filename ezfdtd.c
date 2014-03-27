@@ -46,9 +46,9 @@ unsigned int total_timesteps;
 
 /* grid size */
 unsigned int abc_size;
-unsigned int total_length_x;
-unsigned int total_length_y; 
-unsigned int total_length_z; 
+unsigned int total_x;
+unsigned int total_y; 
+unsigned int total_z; 
 unsigned int main_length_x;
 unsigned int main_length_y;
 unsigned int main_length_z;
@@ -161,7 +161,7 @@ int main (int argc, char** argv)
     if (verbosity > 0) printf("setup probes ... DONE\n");
 
 
-    status = setup_planes(input_file_name, output_file_name, 0);
+    status = setup_planes(input_file_name, output_file_name);
     check(status, "fail to setup planes");
     if (verbosity > 0) printf("setup animations ... DONE\n");
 

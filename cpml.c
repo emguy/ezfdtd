@@ -255,11 +255,11 @@ void cpml_get_d()
     int y_start; 
     int z_start;
 
-    for (x = 0; x < total_length_x; x++)
+    for (x = 0; x < total_x; x++)
     {
-        for (y = 0; y < total_length_y; y++)
+        for (y = 0; y < total_y; y++)
         {
-            for (z = 0; z < total_length_z; z++)
+            for (z = 0; z < total_z; z++)
             {
                 if (in_partition_main(x, y, z)) continue;
 
@@ -440,11 +440,11 @@ void cpml_get_b ()
     int y_start; 
     int z_start;
 
-    for (x = 0; x < total_length_x; x++)
+    for (x = 0; x < total_x; x++)
     {
-        for (y = 0; y < total_length_y; y++)
+        for (y = 0; y < total_y; y++)
         {
-            for (z = 0; z < total_length_z; z++)
+            for (z = 0; z < total_z; z++)
             {
                 if (in_partition_main(x, y, z)) continue;
 

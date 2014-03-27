@@ -24,6 +24,7 @@
 #define POLE_MAX 99 
 #define TOLERANCE 6.6e-66
 #define PI 3.1415926535897932384626434
+#define OUTPUTPORTS_MAX 200
 
 
 typedef struct _DomainData
@@ -77,12 +78,9 @@ extern unsigned int total_timesteps;
 
 /* grid size */
 extern unsigned int abc_size;
-extern unsigned int total_length_x;
-extern unsigned int total_length_y; 
-extern unsigned int total_length_z; 
-extern unsigned int main_length_x;
-extern unsigned int main_length_y;
-extern unsigned int main_length_z;
+extern unsigned int total_x;
+extern unsigned int total_y; 
+extern unsigned int total_z; 
 
 /* the fields */
 extern double ***ex;

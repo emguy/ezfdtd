@@ -158,11 +158,9 @@ void pml_get_h ()
     double d1x, d1y, d1z;
     double d2x, d2y, d2z;
 
-    for (x = 0; x < total_length_x; x++)
-    {
-        for (y = 0; y < total_length_y; y++)
-        {
-            for (z = 0; z < total_length_z; z++)
+    for (z = 0; z < total_z; z++)
+        for (y = 0; y < total_y; y++)
+            for (x = 0; x < total_x; x++)
             {
                 if (in_partition_main(x, y, z)) continue;
 
@@ -254,8 +252,6 @@ void pml_get_h ()
                         break;
                 }
             }
-        }
-    }
 }
 
 void pml_get_e ()
@@ -264,11 +260,9 @@ void pml_get_e ()
     double c1x, c1y, c1z;
     double c2x, c2y, c2z;
 
-    for (x = 0; x < total_length_x; x++)
-    {
-        for (y = 0; y < total_length_y; y++)
-        {
-            for (z = 0; z < total_length_z; z++)
+    for (z = 0; z < total_z; z++)
+        for (y = 0; y < total_y; y++)
+            for (x = 0; x < total_x; x++)
             {
                 if (in_partition_main(x, y, z))  continue;
 
@@ -403,10 +397,6 @@ void pml_get_e ()
                         break;
                 }
             }
-        }
-    }
 }
-
-
 
 

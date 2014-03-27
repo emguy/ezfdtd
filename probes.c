@@ -11,44 +11,31 @@
  * Bugs can be reported to Yu Zhang <zhang235@mcmaster.ca>.
  *
  *     File Name : probes.c
- * Last Modified : Fri 12 Oct 2012 01:08:28 PM EDT
+ * Last Modified : Fri 21 Mar 2014 12:17:34 AM EDT
  */
 
 #include "tools.h"
-#include <string.h>
 #include "ezfdtd.h"
 #include "h5io.h"
 #include "mem.h"
 #include "domain.h"
 #include "probes.h"
 
-OutputPort output_ports[100];
+OutputPort output_ports[OUTPUTPORTS_MAX];
 FieldPlane field_planes[10];
 
+int x, y, z;
 int starting_index;
 
 int total_output_ports;
 int total_planes;
 
-int setup_planes(char* file_name, char* output_file_name, int with_pml)
+int setup_planes(char* file_name, char* output_file_name)
 {
     char attr_name[30];
     int plane_index;
     int status;
-
-    int total_x;
-    int total_y;
-    int total_z;
-
-    total_x = total_length_x;
-    total_y = total_length_y;
-    total_z = total_length_z;
-    if(!with_pml)
-    {
-        total_x = main_length_x;
-        total_y = main_length_y;
-        total_z = main_length_z;
-    }
+    int length_x, length_y, length_z;
 
     status = h5_get_attr(file_name, "outputs", "number_of_field_planes", &total_planes);
     inspect(status, "fail to get h5 attributes");
@@ -58,35 +45,105 @@ int setup_planes(char* file_name, char* output_file_name, int with_pml)
 
     for (plane_index = 1; plane_index <= total_planes; plane_index++)
     {
-        field_planes[plane_index].with_pml = with_pml;
         sprintf(attr_name, "plane_%02d_polarization", plane_index);
         status = h5_get_attr(file_name, "outputs", attr_name, &(field_planes[plane_index].polarization));
         inspect(status, "fail to get h5 attributes");
+
         sprintf(attr_name, "plane_%02d_dim", plane_index);
         status = h5_get_attr(file_name, "outputs", attr_name, &(field_planes[plane_index].dim));
         inspect(status, "fail to get h5 attributes");
+
         sprintf(attr_name, "plane_%02d_slice_index", plane_index);
         status = h5_get_attr(file_name, "outputs", attr_name, &(field_planes[plane_index].slice_index));
         inspect(status, "fail to get h5 attributes");
-        field_planes[plane_index].slice_index = field_planes[plane_index].slice_index - starting_index;
 
-        sprintf(attr_name, "plane_%02d", plane_index);
-        if (field_planes[plane_index].dim == 1)
+        field_planes[plane_index].slice_index -= starting_index;
+
+        if (field_planes[plane_index].dim == dim_x)
         {
-            field_planes[plane_index].field_buffer = (double **)contiguous_mem2(type_double, total_y, total_z);
-            status = h5_empty3(output_file_name, attr_name, type_double, total_y, total_z, total_timesteps);
+            sprintf(attr_name, "plane_%02d_y_start", plane_index);
+            status = h5_get_attr(file_name, "outputs", attr_name, &(field_planes[plane_index].y_start));
+            inspect(status, "fail to get h5 attributes");
+            field_planes[plane_index].y_start -= starting_index;
+
+            sprintf(attr_name, "plane_%02d_z_start", plane_index);
+            status = h5_get_attr(file_name, "outputs", attr_name, &(field_planes[plane_index].z_start));
+            inspect(status, "fail to get h5 attributes");
+            field_planes[plane_index].z_start -= starting_index;
+
+            sprintf(attr_name, "plane_%02d_length_y", plane_index);
+            status = h5_get_attr(file_name, "outputs", attr_name, &length_y);
+            inspect(status, "fail to get h5 attributes");
+            field_planes[plane_index].length_y = length_y;
+            field_planes[plane_index].y_stop = field_planes[plane_index].y_start + length_y;
+
+            sprintf(attr_name, "plane_%02d_length_z", plane_index);
+            status = h5_get_attr(file_name, "outputs", attr_name, &length_z);
+            inspect(status, "fail to get h5 attributes");
+            field_planes[plane_index].length_z = length_z;
+            field_planes[plane_index].z_stop = field_planes[plane_index].z_start + length_z;
+
+            sprintf(attr_name, "plane_%02d", plane_index);
+            field_planes[plane_index].field_buffer = (double **)contiguous_mem2(type_double, length_y, length_z);
+            status = h5_empty3(output_file_name, attr_name, type_double, length_y, length_z, total_timesteps);
             inspect(status, "fail to create an empty dset");
         }
-        else if (field_planes[plane_index].dim == 2)
+        else if (field_planes[plane_index].dim == dim_y)
         {
-            field_planes[plane_index].field_buffer = (double **)contiguous_mem2(type_double, total_x, total_z);
-            status = h5_empty3(output_file_name, attr_name, type_double, total_x, total_z, total_timesteps);
+            sprintf(attr_name, "plane_%02d_z_start", plane_index);
+            status = h5_get_attr(file_name, "outputs", attr_name, &(field_planes[plane_index].z_start));
+            inspect(status, "fail to get h5 attributes");
+            field_planes[plane_index].z_start -= starting_index;
+
+            sprintf(attr_name, "plane_%02d_x_start", plane_index);
+            status = h5_get_attr(file_name, "outputs", attr_name, &(field_planes[plane_index].x_start));
+            inspect(status, "fail to get h5 attributes");
+            field_planes[plane_index].x_start -= starting_index;
+
+            sprintf(attr_name, "plane_%02d_length_z", plane_index);
+            status = h5_get_attr(file_name, "outputs", attr_name, &length_z);
+            inspect(status, "fail to get h5 attributes");
+            field_planes[plane_index].length_z = length_z;
+            field_planes[plane_index].z_stop = field_planes[plane_index].z_start + length_z;
+
+            sprintf(attr_name, "plane_%02d_length_x", plane_index);
+            status = h5_get_attr(file_name, "outputs", attr_name, &length_x);
+            inspect(status, "fail to get h5 attributes");
+            field_planes[plane_index].length_x = length_x;
+            field_planes[plane_index].x_stop = field_planes[plane_index].x_start + length_x;
+
+            sprintf(attr_name, "plane_%02d", plane_index);
+            field_planes[plane_index].field_buffer = (double **)contiguous_mem2(type_double, length_x, length_z);
+            status = h5_empty3(output_file_name, attr_name, type_double, length_x, length_z, total_timesteps);
             inspect(status, "fail to create an empty dset");
         }
-        else if (field_planes[plane_index].dim == 3)
+        else if (field_planes[plane_index].dim == dim_z)
         {
-            field_planes[plane_index].field_buffer = (double **)contiguous_mem2(type_double, total_x, total_y);
-            status = h5_empty3(output_file_name, attr_name, type_double, total_x, total_y, total_timesteps);
+            sprintf(attr_name, "plane_%02d_x_start", plane_index);
+            status = h5_get_attr(file_name, "outputs", attr_name, &(field_planes[plane_index].x_start));
+            inspect(status, "fail to get h5 attributes");
+            field_planes[plane_index].x_start -= starting_index;
+
+            sprintf(attr_name, "plane_%02d_y_start", plane_index);
+            status = h5_get_attr(file_name, "outputs", attr_name, &(field_planes[plane_index].y_start));
+            inspect(status, "fail to get h5 attributes");
+            field_planes[plane_index].y_start -= starting_index;
+
+            sprintf(attr_name, "plane_%02d_length_x", plane_index);
+            status = h5_get_attr(file_name, "outputs", attr_name, &length_x);
+            inspect(status, "fail to get h5 attributes");
+            field_planes[plane_index].length_x = length_x;
+            field_planes[plane_index].x_stop = field_planes[plane_index].x_start + length_x;
+
+            sprintf(attr_name, "plane_%02d_length_y", plane_index);
+            status = h5_get_attr(file_name, "outputs", attr_name, &length_y);
+            inspect(status, "fail to get h5 attributes");
+            field_planes[plane_index].length_y = length_y;
+            field_planes[plane_index].y_stop = field_planes[plane_index].y_start + length_y;
+
+            sprintf(attr_name, "plane_%02d", plane_index);
+            field_planes[plane_index].field_buffer = (double **)contiguous_mem2(type_double, length_x, length_y);
+            status = h5_empty3(output_file_name, attr_name, type_double, length_x, length_y, total_timesteps);
             inspect(status, "fail to create an empty dset");
         }
     }
@@ -96,149 +153,142 @@ int setup_planes(char* file_name, char* output_file_name, int with_pml)
 int update_planes(char* file_name, int time_index)
 {
     int plane_index;
-    int x, y, z;
-    int x_main, y_main, z_main;
     char attr_name[30];
     int status;
+    int x_start, y_start, z_start;
+    int x_stop, y_stop, z_stop;
+    int length_x, length_y, length_z;
 
     if (total_planes == 0) return 1;
     for (plane_index = 1; plane_index <= total_planes; plane_index++)
     {
-        for (x = 0; x < total_length_x; x++)
+        if (field_planes[plane_index].dim == 1)
         {
-            for (y = 0; y < total_length_y; y++)
-            {
-                for (z = 0; z < total_length_z; z++)
+            y_start = field_planes[plane_index].y_start;
+            z_start = field_planes[plane_index].z_start;
+            y_stop = field_planes[plane_index].y_stop;
+            z_stop = field_planes[plane_index].z_stop;
+
+            x = field_planes[plane_index].slice_index;
+
+            for (z = z_start; z < z_stop; z++)
+                for (y = y_start; y < y_stop; y++)
                 {
-                    x_main = x - partition_data[partition_main].x_start;
-                    y_main = y - partition_data[partition_main].y_start;
-                    z_main = z - partition_data[partition_main].z_start;
-
-                    if(field_planes[plane_index].with_pml == 0 && get_partition(x, y, z) == 0)
+                    switch (field_planes[plane_index].polarization)
                     {
-
-                        if (field_planes[plane_index].dim == 1 && x_main == field_planes[plane_index].slice_index)
-                        {
-                            if (field_planes[plane_index].polarization == 1)
-                                field_planes[plane_index].field_buffer[y_main][z_main] = ex[x][y][z];
-                            else if (field_planes[plane_index].polarization == 2)
-                                field_planes[plane_index].field_buffer[y_main][z_main] = ey[x][y][z];
-                            else if (field_planes[plane_index].polarization == 3)
-                                field_planes[plane_index].field_buffer[y_main][z_main] = ez[x][y][z];
-                            else if (field_planes[plane_index].polarization == 4)
-                                field_planes[plane_index].field_buffer[y_main][z_main] = hx[x][y][z];
-                            else if (field_planes[plane_index].polarization == 5)
-                                field_planes[plane_index].field_buffer[y_main][z_main] = hy[x][y][z];
-                            else if (field_planes[plane_index].polarization == 6)
-                                field_planes[plane_index].field_buffer[y_main][z_main] = hz[x][y][z];
-                        }
-                        else if (field_planes[plane_index].dim == 2 && y_main == field_planes[plane_index].slice_index)
-                        {
-                            if (field_planes[plane_index].polarization == 1)
-                                field_planes[plane_index].field_buffer[x_main][z_main] = ex[x][y][z];
-                            else if (field_planes[plane_index].polarization == 2)
-                                field_planes[plane_index].field_buffer[x_main][z_main] = ey[x][y][z];
-                            else if (field_planes[plane_index].polarization == 3)
-                                field_planes[plane_index].field_buffer[x_main][z_main] = ez[x][y][z];
-                            else if (field_planes[plane_index].polarization == 4)
-                                field_planes[plane_index].field_buffer[x_main][z_main] = hx[x][y][z];
-                            else if (field_planes[plane_index].polarization == 5)
-                                field_planes[plane_index].field_buffer[x_main][z_main] = hy[x][y][z];
-                            else if (field_planes[plane_index].polarization == 6)
-                                field_planes[plane_index].field_buffer[x_main][z_main] = hz[x][y][z];
-                        }
-                        else if (field_planes[plane_index].dim == 3 && z_main == field_planes[plane_index].slice_index)
-                        {
-                            if (field_planes[plane_index].polarization == 1)
-                                field_planes[plane_index].field_buffer[x_main][y_main] = ex[x][y][z];
-                            else if (field_planes[plane_index].polarization == 2)
-                                field_planes[plane_index].field_buffer[x_main][y_main] = ey[x][y][z];
-                            else if (field_planes[plane_index].polarization == 3)
-                                field_planes[plane_index].field_buffer[x_main][y_main] = ez[x][y][z];
-                            else if (field_planes[plane_index].polarization == 4)
-                                field_planes[plane_index].field_buffer[x_main][y_main] = hx[x][y][z];
-                            else if (field_planes[plane_index].polarization == 5)
-                                field_planes[plane_index].field_buffer[x_main][y_main] = hy[x][y][z];
-                            else if (field_planes[plane_index].polarization == 6)
-                                field_planes[plane_index].field_buffer[x_main][y_main] = hz[x][y][z];
-                        }
-                    }
-                    if (field_planes[plane_index].with_pml == 1)
-                    {
-                        if (field_planes[plane_index].dim == 1 && x_main == field_planes[plane_index].slice_index)
-                        {
-                            if (field_planes[plane_index].polarization == 1)
-                                field_planes[plane_index].field_buffer[y][z] = ex[x][y][z];
-                            else if (field_planes[plane_index].polarization == 2)
-                                field_planes[plane_index].field_buffer[y][z] = ey[x][y][z];
-                            else if (field_planes[plane_index].polarization == 3)
-                                field_planes[plane_index].field_buffer[y][z] = ez[x][y][z];
-                            else if (field_planes[plane_index].polarization == 4)
-                                field_planes[plane_index].field_buffer[y][z] = hx[x][y][z];
-                            else if (field_planes[plane_index].polarization == 5)
-                                field_planes[plane_index].field_buffer[y][z] = hy[x][y][z];
-                            else if (field_planes[plane_index].polarization == 6)
-                                field_planes[plane_index].field_buffer[y][z] = hz[x][y][z];
-                        }
-                        else if (field_planes[plane_index].dim == 2 && y_main == field_planes[plane_index].slice_index)
-                        {
-                            if (field_planes[plane_index].polarization == 1)
-                                field_planes[plane_index].field_buffer[x][z] = ex[x][y][z];
-                            else if (field_planes[plane_index].polarization == 2)
-                                field_planes[plane_index].field_buffer[x][z] = ey[x][y][z];
-                            else if (field_planes[plane_index].polarization == 3)
-                                field_planes[plane_index].field_buffer[x][z] = ez[x][y][z];
-                            else if (field_planes[plane_index].polarization == 4)
-                                field_planes[plane_index].field_buffer[x][z] = hx[x][y][z];
-                            else if (field_planes[plane_index].polarization == 5)
-                                field_planes[plane_index].field_buffer[x][z] = hy[x][y][z];
-                            else if (field_planes[plane_index].polarization == 6)
-                                field_planes[plane_index].field_buffer[x][z] = hz[x][y][z];
-                        }
-                        else if (field_planes[plane_index].dim == 3 && z_main == field_planes[plane_index].slice_index)
-                        {
-                            if (field_planes[plane_index].polarization == 1)
-                                field_planes[plane_index].field_buffer[x][y] = ex[x][y][z];
-                            else if (field_planes[plane_index].polarization == 2)
-                                field_planes[plane_index].field_buffer[x][y] = ey[x][y][z];
-                            else if (field_planes[plane_index].polarization == 3)
-                                field_planes[plane_index].field_buffer[x][y] = ez[x][y][z];
-                            else if (field_planes[plane_index].polarization == 4)
-                                field_planes[plane_index].field_buffer[x][y] = hx[x][y][z];
-                            else if (field_planes[plane_index].polarization == 5)
-                                field_planes[plane_index].field_buffer[x][y] = hy[x][y][z];
-                            else if (field_planes[plane_index].polarization == 6)
-                                field_planes[plane_index].field_buffer[x][y] = hz[x][y][z];
-                        }
+                        case (p_ex):
+                            field_planes[plane_index].field_buffer[y - y_start][z - z_start] = ex[x][y][z];
+                            break;
+                        case (p_ey):
+                            field_planes[plane_index].field_buffer[y - y_start][z - z_start] = ey[x][y][z];
+                            break;
+                        case (p_ez):
+                            field_planes[plane_index].field_buffer[y - y_start][z - z_start] = ez[x][y][z];
+                            break;
+                        case (p_hx):
+                            field_planes[plane_index].field_buffer[y - y_start][z - z_start] = hx[x][y][z];
+                            break;
+                        case (p_hy):
+                            field_planes[plane_index].field_buffer[y - y_start][z - z_start] = hy[x][y][z];
+                            break;
+                        case (p_hz):
+                            field_planes[plane_index].field_buffer[y - y_start][z - z_start] = hz[x][y][z];
+                            break;
                     }
                 }
-            }
+        }
+
+        if (field_planes[plane_index].dim == 2)
+        {
+            x_start = field_planes[plane_index].x_start;
+            z_start = field_planes[plane_index].z_start;
+            x_stop = field_planes[plane_index].x_stop;
+            z_stop = field_planes[plane_index].z_stop;
+
+            y = field_planes[plane_index].slice_index;
+
+            for (z = z_start; z < z_stop; z++)
+                for (x = x_start; x < x_stop; x++)
+                {
+                    switch (field_planes[plane_index].polarization)
+                    {
+                        case (p_ex):
+                            field_planes[plane_index].field_buffer[x - x_start][z - z_start] = ex[x][y][z];
+                            break;
+                        case (p_ey):
+                            field_planes[plane_index].field_buffer[x - x_start][z - z_start] = ey[x][y][z];
+                            break;
+                        case (p_ez):
+                            field_planes[plane_index].field_buffer[x - x_start][z - z_start] = ez[x][y][z];
+                            break;
+                        case (p_hx):
+                            field_planes[plane_index].field_buffer[x - x_start][z - z_start] = hx[x][y][z];
+                            break;
+                        case (p_hy):
+                            field_planes[plane_index].field_buffer[x - x_start][z - z_start] = hy[x][y][z];
+                            break;
+                        case (p_hz):
+                            field_planes[plane_index].field_buffer[x - x_start][z - z_start] = hz[x][y][z];
+                            break;
+                    }
+                }
+        }
+
+        if (field_planes[plane_index].dim == 3)
+        {
+            x_start = field_planes[plane_index].x_start;
+            y_start = field_planes[plane_index].y_start;
+            x_stop = field_planes[plane_index].x_stop;
+            y_stop = field_planes[plane_index].y_stop;
+
+            z = field_planes[plane_index].slice_index;
+
+            for (x = x_start; x < x_stop; x++)
+                for (y = y_start; y < y_stop; y++)
+                {
+                    switch (field_planes[plane_index].polarization)
+                    {
+                        case (p_ex):
+                            field_planes[plane_index].field_buffer[x - x_start][y - y_start] = ex[x][y][z];
+                            break;
+                        case (p_ey):
+                            field_planes[plane_index].field_buffer[x - x_start][y - y_start] = ey[x][y][z];
+                            break;
+                        case (p_ez):
+                            field_planes[plane_index].field_buffer[x - x_start][y - y_start] = ez[x][y][z];
+                            break;
+                        case (p_hx):
+                            field_planes[plane_index].field_buffer[x - x_start][y - y_start] = hx[x][y][z];
+                            break;
+                        case (p_hy):
+                            field_planes[plane_index].field_buffer[x - x_start][y - y_start] = hy[x][y][z];
+                            break;
+                        case (p_hz):
+                            field_planes[plane_index].field_buffer[x - x_start][y - y_start] = hz[x][y][z];
+                            break;
+                    }
+                }
         }
 
         for (plane_index = 1; plane_index <= total_planes; plane_index++)
         {
+            length_x = field_planes[plane_index].length_x;
+            length_y = field_planes[plane_index].length_y;
+            length_z = field_planes[plane_index].length_z;
+
             sprintf(attr_name, "plane_%02d", plane_index);
             switch (field_planes[plane_index].dim)
             {
                 case (dim_x):
-                    if (field_planes[plane_index].with_pml)
-                        status = h5_slab(file_name, attr_name, type_double, (void **)field_planes[plane_index].field_buffer, total_length_y, total_length_z, time_index);
-                    else
-                        status = h5_slab(file_name, attr_name, type_double, (void **)field_planes[plane_index].field_buffer, main_length_y, main_length_z, time_index);
+                    status = h5_slab(file_name, attr_name, type_double, (void **)field_planes[plane_index].field_buffer, length_y, length_z, time_index);
                     inspect(status, "fail to write h5 hyperslab");
                     break;
                 case (dim_y):
-                    if (field_planes[plane_index].with_pml)
-                        status = h5_slab(file_name, attr_name, type_double, (void **)field_planes[plane_index].field_buffer, total_length_x, total_length_z, time_index);
-                    else
-                        status = h5_slab(file_name, attr_name, type_double, (void **)field_planes[plane_index].field_buffer, main_length_x, main_length_z, time_index);
+                    status = h5_slab(file_name, attr_name, type_double, (void **)field_planes[plane_index].field_buffer, length_x, length_z, time_index);
                     inspect(status, "fail to write h5 hyperslab");
                     break;
                 case (dim_z):
-                    if (field_planes[plane_index].with_pml)
-                        status = h5_slab(file_name, attr_name, type_double, (void **)field_planes[plane_index].field_buffer, total_length_x, total_length_y, time_index);
-                    else
-                        status = h5_slab(file_name, attr_name, type_double, (void **)field_planes[plane_index].field_buffer, main_length_x, main_length_y, time_index);
+                    status = h5_slab(file_name, attr_name, type_double, (void **)field_planes[plane_index].field_buffer, length_x, length_y, time_index);
                     inspect(status, "fail to write h5 hyperslab");
                     break;
             }
@@ -290,15 +340,14 @@ int update_ports(int time_index)
 {
     int port_index;
     int probe_index;
-    int x, y, z;
 
     for (port_index = 1; port_index <= total_output_ports; port_index++)
     {
         for (probe_index = 0; probe_index < output_ports[port_index].total_points; probe_index++)
         {
-            x = output_ports[port_index].probe_points[probe_index][0] + partition_data[partition_main].x_start;
-            y = output_ports[port_index].probe_points[probe_index][1] + partition_data[partition_main].y_start;
-            z = output_ports[port_index].probe_points[probe_index][2] + partition_data[partition_main].z_start;
+            x = output_ports[port_index].probe_points[probe_index][0];
+            y = output_ports[port_index].probe_points[probe_index][1];
+            z = output_ports[port_index].probe_points[probe_index][2];
             if (output_ports[port_index].polarization == 1)
                 switch (mode)
                 {

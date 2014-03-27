@@ -18,6 +18,7 @@
 #include "h5io.h"
 #include "excitation.h"
 
+int x, y, z;
 int **source_points;
 int *source_polarizations;
 double **source_signals;
@@ -87,7 +88,6 @@ int setup_point_sources(char* file_name)
     inspect(status, "fail to load hdf5 dataset");
     if (total_point_sources == 0) return 1;
 
-    printf("-----------\n");
     status = h5_get_attr(file_name, "settings", "starting_index", &starting_index);
     inspect(status, "fail to get h5 attributes");
 
@@ -136,7 +136,6 @@ int setup_hards(char* file_name)
 
 int excite(int time_index)
 {
-    int x_main, y_main, z_main;
     int source_index;
     int port_index;
 
@@ -144,64 +143,72 @@ int excite(int time_index)
     {
         for (source_index = 0; source_index < input_ports[port_index].total_points; source_index++)
         {
-            x_main = input_ports[port_index].source_points[source_index][0];
-            y_main = input_ports[port_index].source_points[source_index][1];
-            z_main = input_ports[port_index].source_points[source_index][2];
+            x = input_ports[port_index].source_points[source_index][0];
+            y = input_ports[port_index].source_points[source_index][1];
+            z = input_ports[port_index].source_points[source_index][2];
 
             if (input_ports[port_index].polarization == p_ex)
-                dipole_ex[x_main][y_main][z_main] = input_ports[port_index].source_signal[time_index] 
+                dipole_ex[x][y][z] = input_ports[port_index].source_signal[time_index] 
                     * input_ports[port_index].source_distribution[source_index];
             else if (input_ports[port_index].polarization == p_ey)
-                dipole_ey[x_main][y_main][z_main] = input_ports[port_index].source_signal[time_index] 
+                dipole_ey[x][y][z] = input_ports[port_index].source_signal[time_index] 
                     * input_ports[port_index].source_distribution[source_index];
             else if (input_ports[port_index].polarization == p_ez)
-                dipole_ez[x_main][y_main][z_main] = input_ports[port_index].source_signal[time_index] 
+                dipole_ez[x][y][z] = input_ports[port_index].source_signal[time_index] 
                     * input_ports[port_index].source_distribution[source_index];
             else if (input_ports[port_index].polarization == p_hx)
-                dipole_hx[x_main][y_main][z_main] = input_ports[port_index].source_signal[time_index] 
+                dipole_hx[x][y][z] = input_ports[port_index].source_signal[time_index] 
                     * input_ports[port_index].source_distribution[source_index];
             else if (input_ports[port_index].polarization == p_hy)
-                dipole_hy[x_main][y_main][z_main] = input_ports[port_index].source_signal[time_index] 
+                dipole_hy[x][y][z] = input_ports[port_index].source_signal[time_index] 
                     * input_ports[port_index].source_distribution[source_index];
             else if (input_ports[port_index].polarization == p_hz)
-                dipole_hz[x_main][y_main][z_main] = input_ports[port_index].source_signal[time_index] 
+                dipole_hz[x][y][z] = input_ports[port_index].source_signal[time_index] 
                     * input_ports[port_index].source_distribution[source_index];
         }
     }
     for (source_index = 0; source_index < total_point_sources; source_index++)
     {
-        x_main = source_points[source_index][0];
-        y_main = source_points[source_index][1];
-        z_main = source_points[source_index][2];
-        if (source_polarizations[source_index] == p_ex)
-            dipole_ex[x_main][y_main][z_main] = source_signals[time_index][source_index];
-        else if (source_polarizations[source_index] == p_ey)
-            dipole_ey[x_main][y_main][z_main] = source_signals[time_index][source_index];
-        else if (source_polarizations[source_index] == p_ez)
-            dipole_ez[x_main][y_main][z_main] = source_signals[time_index][source_index];
-        else if (source_polarizations[source_index] == p_hx)
-            dipole_hx[x_main][y_main][z_main] = source_signals[time_index][source_index];
-        else if (source_polarizations[source_index] == p_hy)
+        x = source_points[source_index][0];
+        y = source_points[source_index][1];
+        z = source_points[source_index][2];
+        switch (source_polarizations[source_index])
         {
-            dipole_hy[x_main][y_main][z_main] = source_signals[time_index][source_index];
-            //printf("[%d %d %d] %e\n", x_main, y_main, z_main, dipole_hy[x_main][y_main][z_main]);
+            case (p_ex):
+                dipole_ex[x][y][z] = source_signals[time_index][source_index];
+                break;
+            case (p_ey):
+                printf("%d, %d, %e\n", time_index, source_index,source_signals[time_index][source_index]);
+                printf("%d, %d, %d\n", x, y, z);
+                dipole_ey[x][y][z] = source_signals[time_index][source_index];
+        printf("----------\n");
+                break;
+            case (p_ez):
+                dipole_ez[x][y][z] = source_signals[time_index][source_index];
+                break;
+            case (p_hx):
+                dipole_hx[x][y][z] = source_signals[time_index][source_index];
+                break;
+            case (p_hy):
+                dipole_hy[x][y][z] = source_signals[time_index][source_index];
+                break;
+            case (p_hz):
+                dipole_hz[x][y][z] = source_signals[time_index][source_index];
+                break;
         }
-        else if (source_polarizations[source_index] == p_hz)
-            dipole_hz[x_main][y_main][z_main] = source_signals[time_index][source_index];
     }
     return 1;
 }
 
 int apply_ehards(int time_index)
 {
-    int x, y, z;
     int hard_index;
 
     for (hard_index = 0; hard_index < total_hards; hard_index++)
     {
-        x = hard_points[hard_index][0] + partition_data[partition_main].x_start;
-        y = hard_points[hard_index][1] + partition_data[partition_main].y_start;
-        z = hard_points[hard_index][2] + partition_data[partition_main].z_start;
+        x = hard_points[hard_index][0];
+        y = hard_points[hard_index][1];
+        z = hard_points[hard_index][2];
         if (hard_polarizations[hard_index] == p_ex)
             ex[x][y][z] = hard_signals[time_index][hard_index];
         else if (hard_polarizations[hard_index] == p_ey)
@@ -219,14 +226,13 @@ int apply_ehards(int time_index)
 
 int apply_hhards(int time_index)
 {
-    int x, y, z;
     int hard_index;
 
     for (hard_index = 0; hard_index < total_hards; hard_index++)
     {
-        x = hard_points[hard_index][0] + partition_data[partition_main].x_start;
-        y = hard_points[hard_index][1] + partition_data[partition_main].y_start;
-        z = hard_points[hard_index][2] + partition_data[partition_main].z_start;
+        x = hard_points[hard_index][0];
+        y = hard_points[hard_index][1];
+        z = hard_points[hard_index][2];
         if (hard_polarizations[hard_index] == p_hx)
             hx[x][y][z] = hard_signals[time_index][hard_index];
         else if (hard_polarizations[hard_index] == p_hy)
