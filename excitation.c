@@ -178,10 +178,7 @@ int excite(int time_index)
                 dipole_ex[x][y][z] = source_signals[time_index][source_index];
                 break;
             case (p_ey):
-                printf("%d, %d, %e\n", time_index, source_index,source_signals[time_index][source_index]);
-                printf("%d, %d, %d\n", x, y, z);
                 dipole_ey[x][y][z] = source_signals[time_index][source_index];
-        printf("----------\n");
                 break;
             case (p_ez):
                 dipole_ez[x][y][z] = source_signals[time_index][source_index];
