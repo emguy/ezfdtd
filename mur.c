@@ -405,7 +405,7 @@ static void update_ey_x0 ()
             ey_x0_d[y][z] = ey[0][y][z];
 
             ey_x0[y][z] = k2_x0[y][z] * (ey[0][y][z] + ey[1][y][z]);
-            /*
+
             if (y > 0 && y < total_y && mode != mode_tmy && mode != mode_tey)
             {
                 ey_x0[y][z] += ky_x0[y][z] * ey[0][y-1][z] - ky_x0[y][z] * ey[0][y][z];
@@ -426,8 +426,7 @@ static void update_ey_x0 ()
                 ey_x0[y][z] += kz_x0[y][z] * ey[0][y][z+1] - kz_x0[y][z] * ey[0][y][z];
                 ey_x0[y][z] += kz_x0[y][z] * ey[1][y][z+1] - kz_x0[y][z] * ey[1][y][z];
             }
-            */
-            /*
+
             if (y > 0 && y < total_y && mode != mode_tmy && mode != mode_tey)
             {
                 ey_x0[y][z] += ky_x0[y][z] * (ey[0][y-1][z] + ey[0][y+1][z]) - 2 * ky_x0[y][z] * ey[0][y][z];
@@ -438,7 +437,6 @@ static void update_ey_x0 ()
                 ey_x0[y][z] += kz_x0[y][z] * (ey[0][y][z-1] + ey[0][y][z+1]) - 2 * kz_x0[y][z] * ey[0][y][z];
                 ey_x0[y][z] += kz_x0[y][z] * (ey[1][y][z-1] + ey[1][y][z+1]) - 2 * kz_x0[y][z] * ey[1][y][z];
             }
-            */
         }
 }
 
@@ -454,7 +452,7 @@ static void update_ez_x0 ()
 
             ez_x0[y][z] = k2_x0[y][z] * (ez[0][y][z] + ez[1][y][z]);
             //printf("%e %e %e\n", ez[0][y][z],  k1_x0[y][z], k2_x0[y][z]);
-            /*
+
             if (y > 0 && y < total_y && mode != mode_tmy && mode != mode_tey)
             {
                 ez_x0[y][z] += ky_x0[y][z] * (ez[0][y-1][z] - ez[0][y][z]);
@@ -475,7 +473,6 @@ static void update_ez_x0 ()
                 ez_x0[y][z] += kz_x0[y][z] * (ez[0][y][z+1] - ez[0][y][z]);
                 ez_x0[y][z] += kz_x0[y][z] * (ez[1][y][z+1] - ez[1][y][z]);
             }
-            */
         }
 }
 
@@ -491,7 +488,7 @@ static void update_ey_x1 ()
             ey_x1_d[y][z] = ey[total_x][y][z];
 
             ey_x1[y][z] = k2_x1[y][z] * (ey[total_x][y][z] + ey[total_x - 1][y][z]);
-            /*
+
             if (y > 0 && y < total_y && mode != mode_tmy && mode != mode_tey)
             {
                 ey_x1[y][z] += ky_x1[y][z] * (ey[total_x][y-1][z] - ey[total_x][y][z]);
@@ -512,7 +509,6 @@ static void update_ey_x1 ()
                 ey_x1[y][z] += kz_x1[y][z] * (ey[total_x][y][z+1] - ey[total_x][y][z]);
                 ey_x1[y][z] += kz_x1[y][z] * (ey[total_x - 1][y][z+1] - ey[total_x - 1][y][z]);
             }
-            */
         }
 }
 
@@ -528,7 +524,6 @@ static void update_ez_x1 ()
 
             ez_x1[y][z] = k2_x1[y][z] * (ez[total_x][y][z] + ez[total_x - 1][y][z]);
 
-            /*
             if (y > 0 && y < total_y && mode != mode_tmy && mode != mode_tey)
             {
                 ez_x1[y][z] += ky_x1[y][z] * (ez[total_x][y-1][z] - ez[total_x][y][z]);
@@ -549,7 +544,6 @@ static void update_ez_x1 ()
                 ez_x1[y][z] += kz_x1[y][z] * (ez[total_x][y][z+1] - ez[total_x][y][z]);
                 ez_x1[y][z] += kz_x1[y][z] * (ez[total_x - 1][y][z+1] - ez[total_x - 1][y][z]);
             }
-            */
         }
 }
 
@@ -566,7 +560,7 @@ static void update_ex_y0 ()
             ex_y0_d[x][z] = ex[x][0][z];
 
             ex_y0[x][z] = k2_y0[x][z] * (ex[x][0][z] + ex[x][1][z]);
-            /*
+
             if (x > 0 && x < total_x && mode != mode_tmx && mode != mode_tex)
             {
                 ex_y0[x][z] += kx_y0[x][z] * (ex[x-1][0][z] - ex[x][0][z]);
@@ -587,7 +581,6 @@ static void update_ex_y0 ()
                 ex_y0[x][z] += kz_y0[x][z] * (ex[x][0][z+1] - ex[x][0][z]);
                 ex_y0[x][z] += kz_y0[x][z] * (ex[x][1][z+1] - ex[x][1][z]);
             }
-            */
         }
 }
 
@@ -602,7 +595,7 @@ static void update_ez_y0 ()
             ez_y0_d[x][z]  = ez[x][0][z];
 
             ez_y0[x][z] = k2_y0[x][z] * (ez[x][0][z] + ez[x][1][z]);
-            /*
+
             if (x > 0 && x < total_x && mode != mode_tmx && mode != mode_tex)
             {
                 ez_y0[x][z] += kx_y0[x][z] * (ez[x-1][0][z] - ez[x][0][z]);
@@ -623,7 +616,6 @@ static void update_ez_y0 ()
                 ez_y0[x][z] += kz_y0[x][z] * (ez[x][0][z+1] - ez[x][0][z]);
                 ez_y0[x][z] += kz_y0[x][z] * (ez[x][1][z+1] - ez[x][1][z]);
             }
-            */
         }
 }
 
@@ -638,7 +630,7 @@ static void update_ex_y1 ()
             ex_y1_d[x][z] = ex[x][total_y][z];
 
             ex_y1[x][z] = k2_y1[x][z] * (ex[x][total_y][z] + ex[x][total_y - 1][z]);
-            /*
+
             if (x > 0 && x < total_x && mode != mode_tmx && mode != mode_tex)
             {
                 ex_y1[x][z] += kx_y1[x][z] * (ex[x-1][total_y][z] - ex[x][total_y][z]);
@@ -659,7 +651,6 @@ static void update_ex_y1 ()
                 ex_y1[x][z] += kz_y1[x][z] * (ex[x][total_y][z+1] - ex[x][total_y][z]);
                 ex_y1[x][z] += kz_y1[x][z] * (ex[x][total_y - 1][z+1] - ex[x][total_y - 1][z]);
             }
-            */
         }
 }
 
@@ -676,7 +667,7 @@ static void update_ez_y1 ()
             ez_y1_d[x][z] = ez[x][total_y][z];
 
             ez_y1[x][z] = k2_y1[x][z] * (ez[x][total_y][z] + ez[x][total_y - 1][z]);
-            /*
+
             if (x > 0 && x < total_x && mode != mode_tmx && mode != mode_tex)
             {
                 ez_y1[x][z] += kx_y1[x][z] * (ez[x-1][total_y][z] - ez[x][total_y][z]);
@@ -697,7 +688,6 @@ static void update_ez_y1 ()
                 ez_y1[x][z] += kz_y1[x][z] * (ez[x][total_y][z+1] - ez[x][total_y][z]);
                 ez_y1[x][z] += kz_y1[x][z] * (ez[x][total_y - 1][z+1] - ez[x][total_y - 1][z]);
             }
-            */
         }
 }
 
@@ -712,7 +702,7 @@ static void update_ex_z0 ()
             ex_z0_d[x][y]  = ex[x][y][0];
 
             ex_z0[x][y] = k2_z0[x][y] * (ex[x][y][0] + ex[x][y][1]);
-            /*
+
             if (x > 0 && x < total_x && mode != mode_tmx && mode != mode_tex)
             {
                 ex_z0[x][y] += kx_z0[x][y] * (ex[x-1][y][0] - ex[x][y][0]);
@@ -733,7 +723,6 @@ static void update_ex_z0 ()
                 ex_z0[x][y] += ky_z0[x][y] * (ex[x][y+1][0] - ex[x][y][0]);
                 ex_z0[x][y] += ky_z0[x][y] * (ex[x][y+1][1] - ex[x][y][1]);
             }
-            */
         }
 }
 
@@ -749,7 +738,6 @@ static void update_ey_z0 ()
 
             ey_z0[x][y] = k2_z0[x][y] * (ey[x][y][0] + ey[x][y][1]);
 
-            /*
             if (x > 0 && x < total_x && mode != mode_tmx && mode != mode_tex)
             {
                 ey_z0[x][y] += kx_z0[x][y] * (ey[x-1][y][0] - ey[x][y][0]);
@@ -770,7 +758,6 @@ static void update_ey_z0 ()
                 ey_z0[x][y] += ky_z0[x][y] * (ey[x][y+1][0] - ey[x][y][0]);
                 ey_z0[x][y] += ky_z0[x][y] * (ey[x][y+1][1] - ey[x][y][1]);
             }
-            */
         }
 }
 
@@ -786,7 +773,6 @@ static void update_ex_z1 ()
 
             ex_z1[x][y] = k2_z1[x][y] * (ex[x][y][total_z] + ex[x][y][total_z - 1]);
 
-            /*
             if (x > 0 && x < total_x && mode != mode_tmx && mode != mode_tex)
             {
                 ex_z1[x][y] += kx_z1[x][y] * (ex[x-1][y][total_z] - ex[x][y][total_z]);
@@ -807,7 +793,6 @@ static void update_ex_z1 ()
                 ex_z1[x][y] += ky_z1[x][y] * (ex[x][y+1][total_z] - ex[x][y][total_z]);
                 ex_z1[x][y] += ky_z1[x][y] * (ex[x][y+1][total_z - 1] - ex[x][y][total_z - 1]);
             }
-            */
         }
 }
 
@@ -822,7 +807,7 @@ static void update_ey_z1 ()
             ey_z1_d[x][y] = ey[x][y][total_z];
 
             ey_z1[x][y] = k2_z1[x][y] * (ey[x][y][total_z] + ey[x][y][total_z - 1]);
-            /*
+
             if (x > 0 && x < total_x && mode != mode_tmx && mode != mode_tex)
             {
                 ey_z1[x][y] += kx_z1[x][y] * (ey[x-1][y][total_z] - ey[x][y][total_z]);
@@ -843,6 +828,5 @@ static void update_ey_z1 ()
                 ey_z1[x][y] += ky_z1[x][y] * (ey[x][y+1][total_z] - ey[x][y][total_z]);
                 ey_z1[x][y] += ky_z1[x][y] * (ey[x][y+1][total_z - 1] - ey[x][y][total_z - 1]);
             }
-            */
         }
 }
